@@ -47,9 +47,9 @@ body::before {
 }
 
 .page {
-  max-width: 1180px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 34px 18px;
+  padding: 28px 14px;
   position: relative;
 }
 
@@ -110,8 +110,8 @@ h1 {
 
 .layout {
   display: grid;
-  grid-template-columns: 360px minmax(0, 1fr);
-  gap: 22px;
+  grid-template-columns: minmax(300px, 360px) minmax(420px, 1fr);
+  gap: 18px;
 }
 
 .panel {
@@ -227,7 +227,7 @@ input:focus {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 680px;
+  min-height: 620px;
 }
 
 .chat-topbar {
@@ -308,7 +308,7 @@ input:focus {
   margin: 0;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 760px) {
   .hero, .layout {
     grid-template-columns: 1fr;
   }
@@ -334,5 +334,95 @@ input:focus {
 
   .clear-chat {
     width: 100%;
+  }
+}
+
+
+/* v8: quick info + calculator only, no free-text chat */
+.no-chat-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 330px) minmax(360px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.grade-panel {
+  grid-column: 1 / -1;
+  padding: 24px;
+}
+
+.answer-panel {
+  min-height: 320px;
+}
+
+.quick-answer {
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  min-height: 220px;
+}
+
+.formula-box {
+  display: grid;
+  gap: 8px;
+  background: rgba(238, 234, 255, 0.72);
+  border: 1px solid rgba(109, 93, 252, 0.22);
+  border-radius: 18px;
+  padding: 16px;
+  margin: 18px 0;
+  line-height: 1.7;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+  max-width: 520px;
+}
+
+.button-row .secondary {
+  margin-top: 0;
+}
+
+.final-grade {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(238, 234, 255, 0.78);
+  border: 1px solid rgba(109, 93, 252, 0.24);
+  margin-bottom: 12px;
+}
+
+.final-grade span {
+  font-weight: 800;
+}
+
+.final-grade strong {
+  font-size: 2rem;
+  color: var(--accent-dark);
+}
+
+.result-lines {
+  line-height: 1.75;
+}
+
+@media (max-width: 900px) {
+  .no-chat-layout,
+  .form-grid,
+  .button-row {
+    grid-template-columns: 1fr;
   }
 }

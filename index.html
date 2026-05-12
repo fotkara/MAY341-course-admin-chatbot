@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Οδηγός Μαθήματος — Εισαγωγή στην Αριθμητική Ανάλυση</title>
+  <title>Βοηθός Μαθήματος — Εισαγωγή στην Αριθμητική Ανάλυση</title>
   <link rel="stylesheet" href="style.css" />
   <script>
     window.MathJax = {
@@ -17,78 +17,76 @@
   <main class="page">
     <section class="hero">
       <div>
-        <p class="eyebrow">Course Policy Chatbot</p>
-        <h1>Εισαγωγή στην Αριθμητική Ανάλυση</h1>
+        <p class="eyebrow">Course Helper</p>
+        <h1>Βοηθός μαθήματος</h1>
         <p class="subtitle">
-          Βοηθός για οργανωτικές ερωτήσεις, διαλέξεις, ώρες γραφείου και
-          υπολογισμό υποθετικού τελικού βαθμού.
+          Εισαγωγή στην Αριθμητική Ανάλυση — γρήγορες πληροφορίες και υπολογιστής υποθετικού τελικού βαθμού.
         </p>
       </div>
       <div class="notice">
-        <strong>Σημαντικό:</strong> Το chatbot δεν γνωρίζει προσωπικούς βαθμούς φοιτητών
-        και δεν απαντά για ατομικές επιδόσεις. Υπολογίζει μόνο υποθετικά παραδείγματα
-        με βάση τους κανόνες του μαθήματος.
+        <strong>Σημαντικό:</strong> Το εργαλείο δεν γνωρίζει προσωπικούς βαθμούς φοιτητών
+        και δεν απαντά για ατομικές επιδόσεις. Υπολογίζει μόνο υποθετικά παραδείγματα.
       </div>
     </section>
 
-    <section class="layout">
+    <section class="layout no-chat-layout">
       <aside class="panel">
-        <h2>Γρήγορες ερωτήσεις</h2>
-        <button class="quick" data-q="Πώς βγαίνει ο τελικός βαθμός;">Πώς βγαίνει ο τελικός βαθμός;</button>
-        <button class="quick" data-q="Πότε γίνονται οι διαλέξεις;">Πότε γίνονται οι διαλέξεις;</button>
-        <button class="quick" data-q="Πότε είναι οι ώρες γραφείου;">Πότε είναι οι ώρες γραφείου;</button>
-        <button class="quick" data-q="Πότε είναι η τελική εξέταση;">Πότε είναι η τελική εξέταση;</button>
-        <button class="quick" data-q="Τι ισχύει για τα κουίζ;">Τι ισχύει για τα κουίζ;</button>
-        <button class="quick" data-q="Τι ισχύει για τα διαγωνίσματα;">Τι ισχύει για τα διαγωνίσματα;</button>
+        <h2>Γρήγορες πληροφορίες</h2>
+        <button class="quick" data-answer="grade">Πώς βγαίνει ο τελικός βαθμός;</button>
+        <button class="quick" data-answer="lectures">Πότε γίνονται οι διαλέξεις;</button>
+        <button class="quick" data-answer="office">Πότε είναι οι ώρες γραφείου;</button>
+        <button class="quick" data-answer="exam">Πότε είναι η τελική εξέταση;</button>
+        <button class="quick" data-answer="quiz">Τι ισχύει για τα κουίζ;</button>
+        <button class="quick" data-answer="midterms">Τι ισχύει για τα διαγωνίσματα;</button>
+      </aside>
 
-        <hr />
+      <section class="panel answer-panel">
+        <h2>Απάντηση</h2>
+        <div id="quickAnswer" class="quick-answer">
+          Επιλέξτε μία από τις γρήγορες πληροφορίες.
+        </div>
+      </section>
 
+      <section class="panel grade-panel">
         <h2>Υπολογιστής βαθμού</h2>
         <p class="small">
-          Συμπληρώστε υποθετικούς βαθμούς στην κλίμακα 0–10. Το B είναι το συνολικό μπόνους από τα κουίζ που προστίθεται στο τέλος. Μπορείτε να γράψετε δεκαδικά με τελεία ή κόμμα.
+          Συμπληρώστε υποθετικούς βαθμούς στην κλίμακα 0–10. Το <strong>B</strong> είναι το συνολικό μπόνους από τα κουίζ που προστίθεται στο τέλος. Μπορείτε να γράψετε δεκαδικά με τελεία ή κόμμα.
         </p>
 
-        <label>Τελική εξέταση Γ
-          <input id="gamma" type="text" inputmode="decimal" placeholder="π.χ. 6" />
-        </label>
+        <div class="formula-box">
+          <div>\( A=\dfrac{A_1+A_2}{2} \)</div>
+          <div>\( T=\max\{\Gamma,\;0.6\Gamma+0.4A\} \)</div>
+          <div>\( TB=T+B \), αν \(T>3.5\). Αλλιώς \(TB=T\).</div>
+        </div>
 
-        <label>1ο διαγώνισμα A1
-          <input id="a1" type="text" inputmode="decimal" placeholder="π.χ. 7" />
-        </label>
+        <div class="form-grid">
+          <label>Τελική εξέταση Γ
+            <input id="gamma" type="text" inputmode="decimal" placeholder="π.χ. 6" />
+          </label>
 
-        <label>2ο διαγώνισμα A2
-          <input id="a2" type="text" inputmode="decimal" placeholder="π.χ. 8" />
-        </label>
+          <label>1ο διαγώνισμα A1
+            <input id="a1" type="text" inputmode="decimal" placeholder="π.χ. 7" />
+          </label>
 
-        <label>Συνολικό μπόνους κουίζ B
-          <input id="b" type="text" inputmode="decimal" placeholder="π.χ. 0,5" />
-        </label>
+          <label>2ο διαγώνισμα A2
+            <input id="a2" type="text" inputmode="decimal" placeholder="π.χ. 8" />
+          </label>
 
-        <button id="calcBtn" class="primary">Υπολογισμός</button>
-        <button id="clearCalcBtn" class="secondary" type="button">Καθαρισμός πεδίων</button>
+          <label>Συνολικό μπόνους κουίζ B
+            <input id="b" type="text" inputmode="decimal" placeholder="π.χ. 0,5" />
+          </label>
+        </div>
+
+        <div class="button-row">
+          <button id="calcBtn" class="primary">Υπολογισμός</button>
+          <button id="clearCalcBtn" class="secondary" type="button">Καθαρισμός πεδίων</button>
+        </div>
+
         <div id="calcResult" class="calc-result"></div>
 
         <p class="small muted">
-          Αν δεν έχει οριστεί διαφορετικά, το εργαλείο δεν εφαρμόζει στρογγυλοποίηση
-          και δεν κόβει αυτόματα τον βαθμό στο 10. Αυτοί οι κανόνες μπορούν να προστεθούν.
+          Δεν εφαρμόζεται στρογγυλοποίηση ή πλαφόν στο 10, εκτός αν προστεθεί ρητά στον κώδικα.
         </p>
-      </aside>
-
-      <section class="chat-card">
-        <div class="chat-topbar">
-          <div>
-            <div class="chat-title">Συνομιλία</div>
-            <div class="small muted">Οι προηγούμενες ερωτήσεις μπορούν να καθαριστούν.</div>
-          </div>
-          <div class="chat-actions">
-            <button id="clearChatBtn" class="clear-chat" type="button">Καθαρισμός συνομιλίας</button>
-          </div>
-        </div>
-        <div id="chat" class="chat" aria-live="polite"></div>
-        <form id="chatForm" class="composer">
-          <input id="userInput" autocomplete="off" placeholder="Γράψτε την ερώτησή σας..." />
-          <button type="submit">Αποστολή</button>
-        </form>
       </section>
     </section>
   </main>
