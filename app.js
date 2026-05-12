@@ -8,16 +8,25 @@ function normalizeGreek(text) {
     .trim();
 }
 
+function parseNumber(value) {
+  // Δέχεται και τελεία και ελληνικό δεκαδικό κόμμα, π.χ. 0.5 ή 0,5.
+  if (value === null || value === undefined) return NaN;
+  const cleaned = String(value).trim().replace(",", ".");
+  if (cleaned === "") return NaN;
+  return Number(cleaned);
+}
+
 function formatNumber(x) {
   if (!Number.isFinite(x)) return "";
-  return Math.round(x * 1000) / 1000;
+  return (Math.round(x * 1000) / 1000).toString().replace(".", ",");
 }
 
 function calculateGrade(gamma, a1, a2, b) {
   const A = (a1 + a2) / 2;
-  const T = Math.max(gamma, 0.6 * gamma + 0.4 * A);
+  const weighted = 0.6 * gamma + 0.4 * A;
+  const T = Math.max(gamma, weighted);
   const TB = T > 3.5 ? T + b : T;
-  return { A, T, TB };
+  return { A, weighted, T, TB };
 }
 
 function answerQuestion(question) {
@@ -86,7 +95,7 @@ ${COURSE_POLICY.examDate}
   if (q.includes("κουιζ") || q.includes("quiz") || q.includes("συμμετοχ")) {
     return `Τα κουίζ γίνονται διαδικτυακά στο e-course στα τελευταία 15 λεπτά κάθε διάλεξης.
 
-Οι ερωτήσεις βασίζονται στην ύλη που καλύφθηκε στη συγκεκριμένη διάλεξη. Από τα κουίζ προκύπτει ο βαθμός B, ο οποίος εξαρτάται από τον αριθμό των κουίζ που έχουν υποβληθεί και από τους βαθμούς σε αυτά.
+Οι ερωτήσεις βασίζονται στην ύλη που καλύφθηκε στη συγκεκριμένη διάλεξη. Από τα κουίζ προκύπτει ένα συνολικό μπόνους B.
 
 Το συνολικό μπόνους B από τα κουίζ προστίθεται στο τέλος μόνο αν πρώτα ισχύει T > 3.5.`;
   }
@@ -125,7 +134,7 @@ ${COURSE_POLICY.email}`;
 • Πώς βγαίνει ο τελικός βαθμός;
 • Τι ισχύει για τα κουίζ;
 • Πότε είναι οι ώρες γραφείου;
-• Αν έχω Γ=6, A1=7, A2=8 και B=0.5, πόσο βγαίνει υποθετικά ο τελικός βαθμός;`;
+• Αν έχω Γ=6, A1=7, A2=8 και B=0,5, πόσο βγαίνει υποθετικά ο τελικός βαθμός;`;
 }
 
 function appendMessage(text, role) {
@@ -155,6 +164,64 @@ function handleQuestion(question) {
   appendMessage(answer, "assistant");
 }
 
+function runGradeCalculation() {
+  const gammaRaw = document.getElementById("gamma").value;
+  const a1Raw = document.getElementById("a1").value;
+  const a2Raw = document.getElementById("a2").value;
+  const bRaw = document.getElementById("b").value;
+  const result = document.getElementById("calcResult");
+
+  if (!gammaRaw.trim() || !a1Raw.trim() || !a2Raw.trim() || !bRaw.trim()) {
+    result.textContent = "Παρακαλώ συμπληρώστε και τα τέσσερα πεδία: Γ, A1, A2 και B.";
+    return;
+  }
+
+  const gamma = parseNumber(gammaRaw);
+  const a1 = parseNumber(a1Raw);
+  const a2 = parseNumber(a2Raw);
+  const b = parseNumber(bRaw);
+
+  const gradeValues = [gamma, a1, a2];
+  if (gradeValues.some(v => !Number.isFinite(v) || v < 0 || v > 10)) {
+    result.textContent = "Οι βαθμοί Γ, A1 και A2 πρέπει να είναι αριθμοί από 0 έως 10.";
+    return;
+  }
+
+  if (!Number.isFinite(b) || b < 0) {
+    result.textContent = "Το B πρέπει να είναι μη αρνητικός αριθμός, π.χ. 0,5 ή 1.";
+    return;
+  }
+
+  const { A, weighted, T, TB } = calculateGrade(gamma, a1, a2, b);
+
+  result.innerHTML = `
+    <div style="font-size:1.15rem; margin-bottom:8px;">
+      <strong>Τελικός βαθμός TB:</strong> ${formatNumber(TB)}
+    </div>
+    <strong>A = (A1+A2)/2:</strong> ${formatNumber(A)}<br>
+    <strong>0.6Γ + 0.4A:</strong> ${formatNumber(weighted)}<br>
+    <strong>T = max{Γ, 0.6Γ+0.4A}:</strong> ${formatNumber(T)}<br>
+    <span class="muted">Αν T>3,5, τότε TB=T+B. Αν T≤3,5, τότε TB=T. Δεν έχει εφαρμοστεί στρογγυλοποίηση ή πλαφόν στο 10.</span>
+  `;
+
+  appendMessage(`Υποθετικός υπολογισμός με Γ=${formatNumber(gamma)}, A1=${formatNumber(a1)}, A2=${formatNumber(a2)}, B=${formatNumber(b)}`, "user");
+  appendMessage(`Ο μέσος όρος των δύο διαγωνισμάτων είναι:
+A = (${formatNumber(a1)}+${formatNumber(a2)})/2 = ${formatNumber(A)}.
+
+Ο σταθμισμένος βαθμός είναι:
+0.6Γ + 0.4A = 0.6·${formatNumber(gamma)} + 0.4·${formatNumber(A)} = ${formatNumber(weighted)}.
+
+Άρα:
+T = max{${formatNumber(gamma)}, ${formatNumber(weighted)}} = ${formatNumber(T)}.
+
+${T > 3.5
+  ? `Επειδή T > 3,5, προστίθεται στο τέλος το συνολικό μπόνους B από τα κουίζ. Άρα TB = ${formatNumber(T)} + ${formatNumber(b)} = ${formatNumber(TB)}.`
+  : `Επειδή T ≤ 3,5, δεν προστίθεται το μπόνους B από τα κουίζ. Άρα TB = ${formatNumber(TB)}.`
+}
+
+Δεν έχει εφαρμοστεί στρογγυλοποίηση ή πλαφόν στο 10.`, "assistant");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   resetChat();
 
@@ -181,38 +248,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("calcResult").textContent = "";
   });
 
-  document.getElementById("calcBtn").addEventListener("click", () => {
-    const gamma = Number(document.getElementById("gamma").value);
-    const a1 = Number(document.getElementById("a1").value);
-    const a2 = Number(document.getElementById("a2").value);
-    const b = Number(document.getElementById("b").value);
-    const result = document.getElementById("calcResult");
+  document.getElementById("calcBtn").addEventListener("click", runGradeCalculation);
 
-    const values = [gamma, a1, a2, b];
-    if (values.some(v => !Number.isFinite(v) || v < 0 || v > 10)) {
-      result.textContent = "Παρακαλώ συμπληρώστε όλους τους βαθμούς/τιμές με αριθμούς από 0 έως 10.";
-      return;
-    }
-
-    const { A, T, TB } = calculateGrade(gamma, a1, a2, b);
-    result.innerHTML = `
-      <strong>A:</strong> ${formatNumber(A)}<br>
-      <strong>T = max{Γ, 0.6Γ+0.4A}:</strong> ${formatNumber(T)}<br>
-      <strong>TB = T + B, αν T>3.5:</strong> ${formatNumber(TB)}<br>
-      <span class="muted">Δεν έχει εφαρμοστεί στρογγυλοποίηση ή πλαφόν στο 10.</span>
-    `;
-
-    appendMessage(`Υποθετικός υπολογισμός με Γ=${gamma}, A1=${a1}, A2=${a2}, B=${b}`, "user");
-    appendMessage(`Ο μέσος όρος των δύο διαγωνισμάτων είναι A=${formatNumber(A)}.
-
-Έπειτα:
-T = max{${gamma}, 0.6·${gamma}+0.4·${formatNumber(A)}} = ${formatNumber(T)}.
-
-${T > 3.5
-  ? `Επειδή T > 3.5, προστίθεται B. Άρα TB = ${formatNumber(T)} + 0.2·${b} = ${formatNumber(TB)}.`
-  : `Επειδή T ≤ 3.5, δεν προστίθεται το μπόνους B από τα κουίζ. Άρα TB = ${formatNumber(TB)}.`
-}
-
-Δεν έχει εφαρμοστεί στρογγυλοποίηση ή πλαφόν στο 10.`, "assistant");
+  ["gamma", "a1", "a2", "b"].forEach(id => {
+    document.getElementById(id).addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        runGradeCalculation();
+      }
+    });
   });
 });

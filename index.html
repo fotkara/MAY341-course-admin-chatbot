@@ -45,23 +45,23 @@
 
         <h2>Υπολογιστής βαθμού</h2>
         <p class="small">
-          Συμπληρώστε υποθετικούς βαθμούς στην κλίμακα 0–10. Το B είναι το συνολικό μπόνους από τα κουίζ που προστίθεται στο τέλος.
+          Συμπληρώστε υποθετικούς βαθμούς στην κλίμακα 0–10. Το B είναι το συνολικό μπόνους από τα κουίζ που προστίθεται στο τέλος. Μπορείτε να γράψετε δεκαδικά με τελεία ή κόμμα.
         </p>
 
         <label>Τελική εξέταση Γ
-          <input id="gamma" type="number" min="0" max="10" step="0.01" placeholder="π.χ. 6" />
+          <input id="gamma" type="text" inputmode="decimal" placeholder="π.χ. 6" />
         </label>
 
         <label>1ο διαγώνισμα A1
-          <input id="a1" type="number" min="0" max="10" step="0.01" placeholder="π.χ. 7" />
+          <input id="a1" type="text" inputmode="decimal" placeholder="π.χ. 7" />
         </label>
 
         <label>2ο διαγώνισμα A2
-          <input id="a2" type="number" min="0" max="10" step="0.01" placeholder="π.χ. 8" />
+          <input id="a2" type="text" inputmode="decimal" placeholder="π.χ. 8" />
         </label>
 
         <label>Συνολικό μπόνους κουίζ B
-          <input id="b" type="number" min="0" max="10" step="0.01" placeholder="π.χ. 0.5" />
+          <input id="b" type="text" inputmode="decimal" placeholder="π.χ. 0,5" />
         </label>
 
         <button id="calcBtn" class="primary">Υπολογισμός</button>
