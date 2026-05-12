@@ -16,7 +16,7 @@ function formatNumber(x) {
 function calculateGrade(gamma, a1, a2, b) {
   const A = (a1 + a2) / 2;
   const T = Math.max(gamma, 0.6 * gamma + 0.4 * A);
-  const TB = T > 3.5 ? T + 0.2 * b : T;
+  const TB = T > 3.5 ? T + b : T;
   return { A, T, TB };
 }
 
@@ -35,7 +35,7 @@ function answerQuestion(question) {
   if (asksPersonalGrade) {
     return `Δεν έχω πρόσβαση σε προσωπικούς βαθμούς φοιτητών και δεν μπορώ να απαντήσω για ατομικές επιδόσεις.
 
-Μπορώ όμως να εξηγήσω πώς υπολογίζεται ο τελικός βαθμός ή να κάνω υποθετικό υπολογισμό, αν μου δώσετε τιμές για Γ, A1, A2 και B.`;
+Μπορώ όμως να εξηγήσω πώς υπολογίζεται ο τελικός βαθμός ή να κάνω υποθετικό υπολογισμό, αν μου δώσετε τιμές για Γ, A1, A2 και το συνολικό μπόνους B από τα κουίζ.`;
   }
 
   if (q.includes("τελικο") || q.includes("βαθμοσ") || q.includes("βαθμολογ") || q.includes("υπολογιζεται") || q.includes("πως βγαινει")) {
@@ -51,12 +51,12 @@ T = \\max\\{\\Gamma,\\;0.6\\Gamma + 0.4A\\},
 \\[
 TB =
 \\begin{cases}
-T + 0.2B, & \\text{αν } T>3.5,\\\\
+T + B, & \\text{αν } T>3.5,\\\\
 T, & \\text{αν } T\\le 3.5.
 \\end{cases}
 \\]
 
-Ο βαθμός B προκύπτει από τα κουίζ συμμετοχής στο e-course.`;
+Το B είναι το συνολικό μπόνους από τα κουίζ συμμετοχής στο e-course.`;
   }
 
   if (q.includes("διαλεξ") || q.includes("μαθημα") || q.includes("ωρα μαθηματοσ") || q.includes("ωρες μαθηματος")) {
@@ -88,7 +88,7 @@ ${COURSE_POLICY.examDate}
 
 Οι ερωτήσεις βασίζονται στην ύλη που καλύφθηκε στη συγκεκριμένη διάλεξη. Από τα κουίζ προκύπτει ο βαθμός B, ο οποίος εξαρτάται από τον αριθμό των κουίζ που έχουν υποβληθεί και από τους βαθμούς σε αυτά.
 
-Ο B προστίθεται στον τελικό βαθμό μόνο αν πρώτα ισχύει T > 3.5.`;
+Το συνολικό μπόνους B από τα κουίζ προστίθεται στο τέλος μόνο αν πρώτα ισχύει T > 3.5.`;
   }
 
   if (q.includes("διαγωνισμ") || q.includes("ενδιαμεσ") || q.includes("35") || q.includes("τριαντα πεντε")) {
@@ -125,7 +125,7 @@ ${COURSE_POLICY.email}`;
 • Πώς βγαίνει ο τελικός βαθμός;
 • Τι ισχύει για τα κουίζ;
 • Πότε είναι οι ώρες γραφείου;
-• Αν έχω Γ=6, A1=7, A2=8 και B=6, πόσο βγαίνει υποθετικά ο τελικός βαθμός;`;
+• Αν έχω Γ=6, A1=7, A2=8 και B=0.5, πόσο βγαίνει υποθετικά ο τελικός βαθμός;`;
 }
 
 function appendMessage(text, role) {
@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const values = [gamma, a1, a2, b];
     if (values.some(v => !Number.isFinite(v) || v < 0 || v > 10)) {
-      result.textContent = "Παρακαλώ συμπληρώστε όλους τους βαθμούς με τιμές από 0 έως 10.";
+      result.textContent = "Παρακαλώ συμπληρώστε όλους τους βαθμούς/τιμές με αριθμούς από 0 έως 10.";
       return;
     }
 
@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
     result.innerHTML = `
       <strong>A:</strong> ${formatNumber(A)}<br>
       <strong>T = max{Γ, 0.6Γ+0.4A}:</strong> ${formatNumber(T)}<br>
-      <strong>TB:</strong> ${formatNumber(TB)}<br>
+      <strong>TB = T + B, αν T>3.5:</strong> ${formatNumber(TB)}<br>
       <span class="muted">Δεν έχει εφαρμοστεί στρογγυλοποίηση ή πλαφόν στο 10.</span>
     `;
 
@@ -209,8 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
 T = max{${gamma}, 0.6·${gamma}+0.4·${formatNumber(A)}} = ${formatNumber(T)}.
 
 ${T > 3.5
-  ? `Επειδή T > 3.5, προστίθεται 0.2B. Άρα TB = ${formatNumber(T)} + 0.2·${b} = ${formatNumber(TB)}.`
-  : `Επειδή T ≤ 3.5, δεν προστίθεται ο βαθμός B από τα κουίζ. Άρα TB = ${formatNumber(TB)}.`
+  ? `Επειδή T > 3.5, προστίθεται B. Άρα TB = ${formatNumber(T)} + 0.2·${b} = ${formatNumber(TB)}.`
+  : `Επειδή T ≤ 3.5, δεν προστίθεται το μπόνους B από τα κουίζ. Άρα TB = ${formatNumber(TB)}.`
 }
 
 Δεν έχει εφαρμοστεί στρογγυλοποίηση ή πλαφόν στο 10.`, "assistant");
