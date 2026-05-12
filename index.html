@@ -32,12 +32,12 @@
     <section class="layout no-chat-layout">
       <aside class="panel">
         <h2>Γρήγορες πληροφορίες</h2>
-        <button class="quick" data-answer="grade">Πώς βγαίνει ο τελικός βαθμός;</button>
-        <button class="quick" data-answer="lectures">Πότε γίνονται οι διαλέξεις;</button>
-        <button class="quick" data-answer="office">Πότε είναι οι ώρες γραφείου;</button>
-        <button class="quick" data-answer="exam">Πότε είναι η τελική εξέταση;</button>
-        <button class="quick" data-answer="quiz">Τι ισχύει για τα κουίζ;</button>
-        <button class="quick" data-answer="midterms">Τι ισχύει για τα διαγωνίσματα;</button>
+        <button type="button" class="quick" data-answer="grade" onclick="showQuickAnswer(\'grade\')">Πώς βγαίνει ο τελικός βαθμός;</button>
+        <button type="button" class="quick" data-answer="lectures" onclick="showQuickAnswer(\'lectures\')">Πότε γίνονται οι διαλέξεις;</button>
+        <button type="button" class="quick" data-answer="office" onclick="showQuickAnswer(\'office\')">Πότε είναι οι ώρες γραφείου;</button>
+        <button type="button" class="quick" data-answer="exam" onclick="showQuickAnswer(\'exam\')">Πότε είναι η τελική εξέταση;</button>
+        <button type="button" class="quick" data-answer="quiz" onclick="showQuickAnswer(\'quiz\')">Τι ισχύει για τα κουίζ;</button>
+        <button type="button" class="quick" data-answer="midterms" onclick="showQuickAnswer(\'midterms\')">Τι ισχύει για τα διαγωνίσματα;</button>
       </aside>
 
       <section class="panel answer-panel">
@@ -78,7 +78,7 @@
         </div>
 
         <div class="button-row">
-          <button id="calcBtn" class="primary">Υπολογισμός</button>
+          <button id="calcBtn" class="primary" type="button" onclick="runGradeCalculation()">Υπολογισμός</button>
           <button id="clearCalcBtn" class="secondary" type="button">Καθαρισμός πεδίων</button>
         </div>
 

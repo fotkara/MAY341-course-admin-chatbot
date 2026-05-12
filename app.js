@@ -32,9 +32,7 @@ function getPolicy() {
     email: "fkarakatsani@uoi.gr"
   };
 
-  if (typeof COURSE_POLICY === "undefined") {
-    return fallback;
-  }
+  if (typeof COURSE_POLICY === "undefined") return fallback;
 
   return {
     lectures: COURSE_POLICY.lectures || fallback.lectures,
@@ -51,18 +49,11 @@ function getQuickAnswers() {
     grade: `Ο τελικός βαθμός υπολογίζεται σε δύο βήματα.
 
 Πρώτα:
-\\[
-T = \\max\\{\\Gamma,\\;0.6\\Gamma + 0.4A\\}.
-\\]
+T = max{Γ, 0.6Γ + 0.4A}
 
 Έπειτα:
-\\[
-TB =
-\\begin{cases}
-T+B, & \\text{αν } T>3.5,\\\\
-T, & \\text{αν } T\\le 3.5.
-\\end{cases}
-\\]
+Αν T > 3.5, τότε TB = T + B.
+Αν T ≤ 3.5, τότε TB = T.
 
 Το B είναι το συνολικό μπόνους από τα κουίζ.`,
 
@@ -93,9 +84,8 @@ ${policy.examDate}
     midterms: `Θα γίνουν δύο ενδιάμεσα διαγωνίσματα διάρκειας μίας ώρας.
 
 Ο βαθμός A είναι ο μέσος όρος των δύο βαθμών:
-\\[
-A = \\frac{A_1 + A_2}{2}.
-\\]
+
+A = (A1 + A2)/2
 
 Συμμετοχή στα διαγωνίσματα έχουν μόνο όσοι/όσες το δηλώσουν στο e-course. Όσοι/όσες δεν γράψουν τουλάχιστον 35% στο πρώτο διαγώνισμα χάνουν αυτόματα το δικαίωμα συμμετοχής στο δεύτερο.`
   };
@@ -111,21 +101,24 @@ function showQuickAnswer(key) {
   document.querySelectorAll(".quick").forEach((button) => {
     button.classList.toggle("active", button.dataset.answer === key);
   });
-
-  if (window.MathJax && typeof MathJax.typesetPromise === "function") {
-    MathJax.typesetPromise([box]).catch(() => {});
-  }
 }
 
 function runGradeCalculation() {
-  const gammaRaw = document.getElementById("gamma").value;
-  const a1Raw = document.getElementById("a1").value;
-  const a2Raw = document.getElementById("a2").value;
-  const bRaw = document.getElementById("b").value;
   const result = document.getElementById("calcResult");
+  if (!result) return;
+
+  const gammaField = document.getElementById("gamma");
+  const a1Field = document.getElementById("a1");
+  const a2Field = document.getElementById("a2");
+  const bField = document.getElementById("b");
+
+  const gammaRaw = gammaField ? gammaField.value : "";
+  const a1Raw = a1Field ? a1Field.value : "";
+  const a2Raw = a2Field ? a2Field.value : "";
+  const bRaw = bField ? bField.value : "";
 
   if (!gammaRaw.trim() || !a1Raw.trim() || !a2Raw.trim() || !bRaw.trim()) {
-    result.textContent = "Παρακαλώ συμπληρώστε και τα τέσσερα πεδία: Γ, A1, A2 και B.";
+    result.innerHTML = '<div class="error">Παρακαλώ συμπληρώστε και τα τέσσερα πεδία: Γ, A1, A2 και B.</div>';
     return;
   }
 
@@ -134,69 +127,67 @@ function runGradeCalculation() {
   const a2 = parseNumber(a2Raw);
   const b = parseNumber(bRaw);
 
-  const gradeValues = [gamma, a1, a2];
-  if (gradeValues.some(v => !Number.isFinite(v) || v < 0 || v > 10)) {
-    result.textContent = "Οι βαθμοί Γ, A1 και A2 πρέπει να είναι αριθμοί από 0 έως 10.";
+  if (![gamma, a1, a2].every(v => Number.isFinite(v) && v >= 0 && v <= 10)) {
+    result.innerHTML = '<div class="error">Οι βαθμοί Γ, A1 και A2 πρέπει να είναι αριθμοί από 0 έως 10.</div>';
     return;
   }
 
   if (!Number.isFinite(b) || b < 0) {
-    result.textContent = "Το B πρέπει να είναι μη αρνητικός αριθμός, π.χ. 0,5 ή 1.";
+    result.innerHTML = '<div class="error">Το B πρέπει να είναι μη αρνητικός αριθμός, π.χ. 0,5 ή 1.</div>';
     return;
   }
 
-  const { A, weighted, T, TB } = calculateGrade(gamma, a1, a2, b);
+  const grades = calculateGrade(gamma, a1, a2, b);
+  const bonusText = grades.T > 3.5
+    ? "Επειδή T > 3,5, προστέθηκε το συνολικό μπόνους B = " + formatNumber(b) + "."
+    : "Επειδή T ≤ 3,5, δεν προστέθηκε το μπόνους B από τα κουίζ.";
 
-  result.innerHTML = `
-    <div class="final-grade">
-      <span>Τελικός βαθμός TB</span>
-      <strong>${formatNumber(TB)}</strong>
-    </div>
-    <div class="result-lines">
-      <div><strong>A = (A1+A2)/2:</strong> ${formatNumber(A)}</div>
-      <div><strong>0.6Γ + 0.4A:</strong> ${formatNumber(weighted)}</div>
-      <div><strong>T = max{Γ, 0.6Γ+0.4A}:</strong> ${formatNumber(T)}</div>
-      <div class="muted">${T > 3.5
-        ? `Επειδή T > 3,5, προστέθηκε το συνολικό μπόνους B=${formatNumber(b)}.`
-        : `Επειδή T ≤ 3,5, δεν προστέθηκε το μπόνους B από τα κουίζ.`}
-      </div>
-    </div>
-  `;
+  result.innerHTML =
+    '<div class="final-grade">' +
+      '<span>Τελικός βαθμός TB</span>' +
+      '<strong>' + formatNumber(grades.TB) + '</strong>' +
+    '</div>' +
+    '<div class="result-lines">' +
+      '<div><strong>A = (A1+A2)/2:</strong> ' + formatNumber(grades.A) + '</div>' +
+      '<div><strong>0.6Γ + 0.4A:</strong> ' + formatNumber(grades.weighted) + '</div>' +
+      '<div><strong>T = max{Γ, 0.6Γ+0.4A}:</strong> ' + formatNumber(grades.T) + '</div>' +
+      '<div class="muted">' + bonusText + '</div>' +
+    '</div>';
 }
 
 function setupApp() {
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", function(event) {
     const quickButton = event.target.closest(".quick[data-answer]");
     if (quickButton) {
       event.preventDefault();
       showQuickAnswer(quickButton.dataset.answer);
+      return;
     }
-  });
 
-  const calcBtn = document.getElementById("calcBtn");
-  if (calcBtn) {
-    calcBtn.addEventListener("click", runGradeCalculation);
-  }
+    if (event.target && event.target.id === "calcBtn") {
+      event.preventDefault();
+      runGradeCalculation();
+      return;
+    }
 
-  const clearBtn = document.getElementById("clearCalcBtn");
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      ["gamma", "a1", "a2", "b"].forEach(id => {
+    if (event.target && event.target.id === "clearCalcBtn") {
+      event.preventDefault();
+      ["gamma", "a1", "a2", "b"].forEach(function(id) {
         const field = document.getElementById(id);
         if (field) field.value = "";
       });
       const result = document.getElementById("calcResult");
-      if (result) result.textContent = "";
+      if (result) result.innerHTML = "";
       const gamma = document.getElementById("gamma");
       if (gamma) gamma.focus();
-    });
-  }
+    }
+  });
 
-  ["gamma", "a1", "a2", "b"].forEach(id => {
+  ["gamma", "a1", "a2", "b"].forEach(function(id) {
     const field = document.getElementById(id);
     if (!field) return;
 
-    field.addEventListener("keydown", (event) => {
+    field.addEventListener("keydown", function(event) {
       if (event.key === "Enter") {
         event.preventDefault();
         runGradeCalculation();
@@ -204,9 +195,12 @@ function setupApp() {
     });
   });
 
-  // Αρχική απάντηση, ώστε να φαίνεται αμέσως ότι τα κουμπιά δουλεύουν.
   showQuickAnswer("grade");
 }
+
+// Κάνουμε διαθέσιμες τις συναρτήσεις και για inline onclick fallback.
+window.runGradeCalculation = runGradeCalculation;
+window.showQuickAnswer = showQuickAnswer;
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", setupApp);
