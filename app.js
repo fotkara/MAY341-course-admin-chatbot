@@ -141,6 +141,14 @@ function appendMessage(text, role) {
   }
 }
 
+function resetChat() {
+  const chat = document.getElementById("chat");
+  chat.innerHTML = "";
+  appendMessage(`Καλώς ήλθατε! Είμαι ο βοηθός του μαθήματος «${COURSE_POLICY.courseTitle}».
+
+Μπορώ να απαντήσω σε οργανωτικές ερωτήσεις και να υπολογίσω υποθετικά τον τελικό βαθμό με βάση τους κανόνες του μαθήματος. Δεν έχω πρόσβαση σε προσωπικούς βαθμούς φοιτητών.`, "assistant");
+}
+
 function handleQuestion(question) {
   appendMessage(question, "user");
   const answer = answerQuestion(question);
@@ -148,9 +156,7 @@ function handleQuestion(question) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  appendMessage(`Καλώς ήλθατε! Είμαι ο βοηθός του μαθήματος «${COURSE_POLICY.courseTitle}».
-
-Μπορώ να απαντήσω σε οργανωτικές ερωτήσεις και να υπολογίσω υποθετικά τον τελικό βαθμό με βάση τους κανόνες του μαθήματος. Δεν έχω πρόσβαση σε προσωπικούς βαθμούς φοιτητών.`, "assistant");
+  resetChat();
 
   document.getElementById("chatForm").addEventListener("submit", (event) => {
     event.preventDefault();
@@ -163,6 +169,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".quick").forEach((btn) => {
     btn.addEventListener("click", () => handleQuestion(btn.dataset.q));
+  });
+
+  document.getElementById("clearChatBtn").addEventListener("click", () => {
+    resetChat();
+    document.getElementById("userInput").focus();
+  });
+
+  document.getElementById("clearCalcBtn").addEventListener("click", () => {
+    ["gamma", "a1", "a2", "b"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("calcResult").textContent = "";
   });
 
   document.getElementById("calcBtn").addEventListener("click", () => {
