@@ -18,8 +18,37 @@ function calculateGrade(gamma, a1, a2, b) {
   return { A, weighted, T, TB };
 }
 
-const QUICK_ANSWERS = {
-  grade: `Ο τελικός βαθμός υπολογίζεται σε δύο βήματα.
+function getPolicy() {
+  const fallback = {
+    lectures: [
+      "Τρίτη 14:00–16:00, Αίθουσα 001",
+      "Πέμπτη 09:00–11:00, Αίθουσα 001"
+    ],
+    officeHours: [
+      "Τρίτη 12:30–13:30",
+      "Πέμπτη 11:30–12:30"
+    ],
+    examDate: "Τρίτη, 27 Ιανουαρίου 2026",
+    email: "fkarakatsani@uoi.gr"
+  };
+
+  if (typeof COURSE_POLICY === "undefined") {
+    return fallback;
+  }
+
+  return {
+    lectures: COURSE_POLICY.lectures || fallback.lectures,
+    officeHours: COURSE_POLICY.officeHours || fallback.officeHours,
+    examDate: COURSE_POLICY.examDate || fallback.examDate,
+    email: COURSE_POLICY.email || fallback.email
+  };
+}
+
+function getQuickAnswers() {
+  const policy = getPolicy();
+
+  return {
+    grade: `Ο τελικός βαθμός υπολογίζεται σε δύο βήματα.
 
 Πρώτα:
 \\[
@@ -37,31 +66,31 @@ T, & \\text{αν } T\\le 3.5.
 
 Το B είναι το συνολικό μπόνους από τα κουίζ.`,
 
-  lectures: `Οι διαλέξεις γίνονται:
+    lectures: `Οι διαλέξεις γίνονται:
 
-• ${COURSE_POLICY.lectures[0]}
-• ${COURSE_POLICY.lectures[1]}`,
+• ${policy.lectures[0]}
+• ${policy.lectures[1]}`,
 
-  office: `Οι ώρες γραφείου είναι:
+    office: `Οι ώρες γραφείου είναι:
 
-• ${COURSE_POLICY.officeHours[0]}
-• ${COURSE_POLICY.officeHours[1]}
+• ${policy.officeHours[0]}
+• ${policy.officeHours[1]}
 
-Αν δεν είστε διαθέσιμοι/ες αυτές τις ώρες, μπορείτε να στείλετε email στη διδάσκουσα (${COURSE_POLICY.email}) για να κανονιστεί διαφορετικό ραντεβού.`,
+Αν δεν είστε διαθέσιμοι/ες αυτές τις ώρες, μπορείτε να στείλετε email στη διδάσκουσα (${policy.email}) για να κανονιστεί διαφορετικό ραντεβού.`,
 
-  exam: `Η τελική εξέταση για το ακαδημαϊκό έτος 2025–2026 έχει οριστεί για:
+    exam: `Η τελική εξέταση για το ακαδημαϊκό έτος 2025–2026 έχει οριστεί για:
 
-${COURSE_POLICY.examDate}
+${policy.examDate}
 
 Ο βαθμός της τελικής εξέτασης συμβολίζεται με Γ.`,
 
-  quiz: `Τα κουίζ γίνονται διαδικτυακά στο e-course στα τελευταία 15 λεπτά κάθε διάλεξης.
+    quiz: `Τα κουίζ γίνονται διαδικτυακά στο e-course στα τελευταία 15 λεπτά κάθε διάλεξης.
 
 Οι ερωτήσεις βασίζονται στην ύλη που καλύφθηκε στη συγκεκριμένη διάλεξη. Από τα κουίζ προκύπτει ένα συνολικό μπόνους B.
 
 Το συνολικό μπόνους B προστίθεται στο τέλος μόνο αν πρώτα ισχύει T > 3.5.`,
 
-  midterms: `Θα γίνουν δύο ενδιάμεσα διαγωνίσματα διάρκειας μίας ώρας.
+    midterms: `Θα γίνουν δύο ενδιάμεσα διαγωνίσματα διάρκειας μίας ώρας.
 
 Ο βαθμός A είναι ο μέσος όρος των δύο βαθμών:
 \\[
@@ -69,12 +98,21 @@ A = \\frac{A_1 + A_2}{2}.
 \\]
 
 Συμμετοχή στα διαγωνίσματα έχουν μόνο όσοι/όσες το δηλώσουν στο e-course. Όσοι/όσες δεν γράψουν τουλάχιστον 35% στο πρώτο διαγώνισμα χάνουν αυτόματα το δικαίωμα συμμετοχής στο δεύτερο.`
-};
+  };
+}
 
 function showQuickAnswer(key) {
   const box = document.getElementById("quickAnswer");
-  box.textContent = QUICK_ANSWERS[key] || "Δεν βρέθηκε απάντηση.";
-  if (window.MathJax) {
+  if (!box) return;
+
+  const answers = getQuickAnswers();
+  box.textContent = answers[key] || "Δεν βρέθηκε απάντηση.";
+
+  document.querySelectorAll(".quick").forEach((button) => {
+    button.classList.toggle("active", button.dataset.answer === key);
+  });
+
+  if (window.MathJax && typeof MathJax.typesetPromise === "function") {
     MathJax.typesetPromise([box]).catch(() => {});
   }
 }
@@ -124,31 +162,54 @@ function runGradeCalculation() {
       </div>
     </div>
   `;
-
-  if (window.MathJax) {
-    MathJax.typesetPromise([result]).catch(() => {});
-  }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".quick").forEach((btn) => {
-    btn.addEventListener("click", () => showQuickAnswer(btn.dataset.answer));
+function setupApp() {
+  document.addEventListener("click", (event) => {
+    const quickButton = event.target.closest(".quick[data-answer]");
+    if (quickButton) {
+      event.preventDefault();
+      showQuickAnswer(quickButton.dataset.answer);
+    }
   });
 
-  document.getElementById("calcBtn").addEventListener("click", runGradeCalculation);
+  const calcBtn = document.getElementById("calcBtn");
+  if (calcBtn) {
+    calcBtn.addEventListener("click", runGradeCalculation);
+  }
 
-  document.getElementById("clearCalcBtn").addEventListener("click", () => {
-    ["gamma", "a1", "a2", "b"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("calcResult").textContent = "";
-    document.getElementById("gamma").focus();
-  });
+  const clearBtn = document.getElementById("clearCalcBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      ["gamma", "a1", "a2", "b"].forEach(id => {
+        const field = document.getElementById(id);
+        if (field) field.value = "";
+      });
+      const result = document.getElementById("calcResult");
+      if (result) result.textContent = "";
+      const gamma = document.getElementById("gamma");
+      if (gamma) gamma.focus();
+    });
+  }
 
   ["gamma", "a1", "a2", "b"].forEach(id => {
-    document.getElementById(id).addEventListener("keydown", (event) => {
+    const field = document.getElementById(id);
+    if (!field) return;
+
+    field.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
         runGradeCalculation();
       }
     });
   });
-});
+
+  // Αρχική απάντηση, ώστε να φαίνεται αμέσως ότι τα κουμπιά δουλεύουν.
+  showQuickAnswer("grade");
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", setupApp);
+} else {
+  setupApp();
+}

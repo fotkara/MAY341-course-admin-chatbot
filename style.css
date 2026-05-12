@@ -426,3 +426,12 @@ input:focus {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* v9: clearer selected quick button */
+.quick.active {
+  background: var(--accent-soft);
+  border-color: rgba(109, 93, 252, 0.55);
+  color: var(--accent-dark);
+  font-weight: 800;
+}
